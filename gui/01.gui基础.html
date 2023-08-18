@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01.初识babylon</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #box {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="box"></canvas>
+</body>
+<script src="../babylon.js"></script>
+<script src="../babylonjs_loaders.min.js"></script>
+<script src="../babylonjs.com_gui_babylon.gui.js"></script>
+<script>
+    // 获取canvas元素
+    let canvas = document.getElementById("box");
+    // 创建渲染引擎
+    let engine = new BABYLON.Engine(canvas, true);
+    // 创建场景
+    const createScene = function () {
+        const scene = new BABYLON.Scene(engine)
+        // 创建一个弧形相机对象
+        const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 3, new BABYLON.Vector3(0, 0, 0), scene);
+        camera.attachControl(canvas, true);
+        // 创建一个光源
+        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+        // 创建一个盒子模型
+        // const box = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
+
+        // GUI  
+        /*
+        要开始使用gui首先需要一个AdvancedDynamicTexture 对象 高级动态纹理对象
+        const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("myUI");
+        */
+        //全屏模式GUI
+        //let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI"); //("UI", false) foreground  // 前景（可选）true会覆盖在canvas上面 false会覆盖在canvas下面
+        // advancedTexture.isForeground = false; // 前景（可选）true会覆盖在canvas上面 false会覆盖在canvas下面
+        // advancedTexture.renderScale = 1; // 渲染比例  正常渲染比例为1（可选）
+        // ！注意，一个场景只允许有一个全屏模式gui
+
+        // let button = BABYLON.GUI.Button.CreateSimpleButton("but1", "点击我！");
+        // button.width = "150px";
+        // button.height = "40px";
+        // button.color = "white";
+        // button.background = "green";
+        // button.onPointerUpObservable.add(function () {
+        //     alert("你点击了我！");
+        // });
+        // advancedTexture.addControl(button);
+        var sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 1, scene);
+
+        var plane = BABYLON.Mesh.CreatePlane("plane", 2);
+        plane.parent = sphere;
+        plane.position.y = 1.5;
+        plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL; //广告牌模式gui始终面向相机
+
+        // 纹理模式GUI
+        let advancedTexture2 = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane, 1024/*纹理宽度*/, 1024/*纹理高度*/, false/*纹理是否捕捉移动事件*/); // 为模型创建gui
+        let button = BABYLON.GUI.Button.CreateSimpleButton("but1", "点击我！");
+        button.width = 1;
+        button.height = 0.5;
+        button.color = "white";
+        button.fontSize = 120;
+        button.background = "green";
+        button.isPointerBlocker = true; // 是否阻止指针事件穿透gui
+        button.onPointerUpObservable.add(function () {
+            alert("你点击了我！");
+        });
+        advancedTexture2.addControl(button);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // 返回场景
+        return scene;
+
+    };
+    // 渲染场景
+    let scene = createScene();
+    engine.runRenderLoop(function () {
+        scene.render();
+    });
+    // 监听窗口变化，改变渲染尺寸
+    window.addEventListener("resize", function () {
+        engine.resize();
+    });
+</script>
+
+</html>

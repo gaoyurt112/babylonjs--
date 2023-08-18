@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01.初识babylon</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #box {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="box"></canvas>
+</body>
+<script src="./babylon.js"></script>
+<script src="../babylonjs_loaders.min.js"></script>
+<script>
+    // 获取canvas元素
+    let canvas = document.getElementById("box");
+    // 创建渲染引擎
+    let engine = new BABYLON.Engine(canvas, true);
+    // 创建场景
+    const createScene = function () {
+        const scene = new BABYLON.Scene(engine)
+
+        const camera = new BABYLON.ArcRotateCamera('camera', 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+        camera.attachControl(canvas, true);
+
+        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+        // 使用AssetsManager类加载多个模型，此类型可以用于加载多个模型活加载文本和二进制文件
+        //注意：导入的模型具有旋转四元数设置，因此使用rotation设置旋转会发现会旋转到意想不到的位置，如果使用rotation请将rotationQuaternion设置为空。
+
+        // 初始化和创建任务
+        // 首先通过场景进行实例化
+        let assetsManager = new BABYLON.AssetsManager(scene);
+
+        // 通过管理器的addMeshTask方法添加任务
+        let meshTask = assetsManager.addMeshTask("skull task", "", "./mods/", "testmod.glb");
+
+
+
+
+        return scene;
+    };
+    // 渲染场景
+    let scene = createScene();
+    engine.runRenderLoop(function () {
+        scene.render();
+    });
+    // 监听窗口变化，改变渲染尺寸
+    window.addEventListener("resize", function () {
+        engine.resize();
+    });
+</script>
+
+</html>

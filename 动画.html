@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01.初识babylon</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #box {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="box"></canvas>
+</body>
+<script src="./babylon.js"></script>
+<script>
+    // 获取canvas元素
+    let canvas = document.getElementById("box");
+    // 创建渲染引擎
+    let engine = new BABYLON.Engine(canvas, true);
+    // 创建场景
+    const createScene = function () {
+        const scene = new BABYLON.Scene(engine)
+
+        const camera = new BABYLON.ArcRotateCamera('camera', 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+        camera.attachControl(canvas, true);
+
+        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+        const box = BABYLON.MeshBuilder.CreateBox("box", {
+            size: 2
+        }, scene);
+
+        // 基本动画
+        // 1.创建一个animation对象
+        let boxmove = new BABYLON.Animation("myAnimation", "scaling.x", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+        let boxmove2 = new BABYLON.Animation("myAnimation2", "scaling.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+        /*参数                        
+        1.动画名字
+        2.变更的属性，取决于要操作的对象属性
+        3.帧数，每秒30帧
+        4.更改的属性值的类型
+        BABYLON.Animation.ANIMATIONTYPE_FLOAT 数字
+BABYLON.Animation.ANIMATIONTYPE_VECTOR2 二维矢量
+BABYLON.Animation.ANIMATIONTYPE_VECTOR3 三维矢量
+BABYLON.Animation.ANIMATIONTYPE_QUATERNION 四元数
+BABYLON.Animation.ANIMATIONTYPE_MATRIX 矩阵
+BABYLON.Animation.ANIMATIONTYPE_COLOR3 颜色
+
+   5.设置此动画执行完成后的行为
+   使用以前的值继续递增运算： BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE
+从初始的值重新动画： BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+保持最后的效果不动：BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+        
+        */
+
+
+        let keys = []
+
+        keys.push({
+            frame: 0,
+            value: 1
+        })
+
+        keys.push({
+            frame: 20,
+            value: 0.2
+        })
+
+        keys.push({
+            frame: 100,
+            value: 1
+        })
+
+        boxmove.setKeys(keys)
+        boxmove2.setKeys(keys)
+        // 2.将动画添加到对象上
+        box.animations = []
+        box.animations.push(boxmove)
+        box.animations.push(boxmove2)
+
+        // scene.beginAnimation(box, 0, 100, true);
+
+
+
+        /*  scene.beginAnimation的参数：
+         名称	            类型	     描述	                                                                是否必须要设置
+         target	            any	        当前动画的模型对象	                                                         必须
+         from	            number	    动画的起始帧	                                                            必须
+         to	                number	    动画的结束帧	                                                            必须
+         loop	            boolean	    如果为true，动画将会循环(取决于BABYLON.Animation.ANIMATIONLOOPMODE)	         可选
+         speedRatio	        number	    默认值为1，动画的速度比	                                                     可选
+         onAnimationEnd	    () => void	设置的动画结束时的回调函数，即使是手动停止的动画 (也取决于ANIMATIONLOOPMODE)	可选
+         animatable	        Animatable	可选的特定动画对象	                                                         可选
+         stopCurrent	    boolean	    结束时是否需要结束当前动画，默认为true，是	                                   可选
+  */
+
+        // 当前函数会返回一个BABYLON.Animatable对象，你可以通过该对象访问单个动画（例如使用getAnimationByTargetProperty函数），也可以通过该对象停止动画
+        // pause() 暂停动画 restart() 重新开始动画 stop() 停止动画 reset() 重置动画
+        // console.log(newAnimation);
+        // newAnumation.pause()
+        // console.log(newAnimation.getAnimationByTargetProperty('scaling.x'));
+
+        // 获取目标属性的动画
+        // let ani = newAnimation.getAnimationByTargetProperty('scaling.x')
+
+        // newAnimation.getAnimations()[0]
+        // newAnimation.stop('myAnimation')
+
+        // 从Babylon.js的v3.3版本开始，你可以使用promises等待动画结束
+        // setTimeout(async () => {
+        //     let newAnimation = scene.beginAnimation(box, 100, 0, false);
+        //     console.log(newAnimation);
+        //     console.log('动画执行前');
+        //     await newAnimation.waitAsync()
+        //     console.log('动画执行后');
+        // })
+
+
+
+        //辅助函数
+        // 可以使用扩展函数快速创建动画
+        BABYLON.Animation.CreateAndStartAnimation('boxmove', box, 'scaling.x', 30, 100, 1, 0.2, 0, null, () => {
+            console.log('动画执行完毕');
+        })
+
+
+
+
+
+        return scene;
+    };
+    // 渲染场景
+    let scene = createScene();
+    engine.runRenderLoop(function () {
+        scene.render();
+    });
+    // 监听窗口变化，改变渲染尺寸
+    window.addEventListener("resize", function () {
+        engine.resize();
+    });
+</script>
+
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01.初识babylon</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #box {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="box"></canvas>
+</body>
+<script src="./babylon.js"></script>
+<script>
+    // 获取canvas元素
+    let canvas = document.getElementById("box");
+    // 创建渲染引擎
+    let engine = new BABYLON.Engine(canvas, true);
+    // 创建场景
+    const createScene = function () {
+        const scene = new BABYLON.Scene(engine)
+
+        // 在babylon中，最常用的两个相机第一人称相机和弧形相机
+
+        // 对于相机的创建，必须要将相机附加到canvas画布上才能被使用
+        // camera.attachControl(canvas, true);  将相机绑定到canvas画布上，第二个参数默认为false,表示是否捕捉鼠标事件,如果为true,则表示捕捉鼠标事件
+
+
+        // 1.第一人称相机 UniversalCamera 参数：相机名字，相机位置，场景
+        // 通用相机  参数：相机名字，相机位置，场景
+        // let camera = new BABYLON.UniversalCamera("camera", new BABYLON.Vector3(0, 5, -10), scene);
+        // 使用setTarget方法，将相机对准某个物体
+        // camera.setTarget(BABYLON.Vector3.Zero());
+
+
+
+        //2.弧形旋转相机 ArcRotateCamera  参数：相机名字，相机的旋转角度，相机的旋转半径，相机的旋转半径，相机的旋转目标，场景
+        // let camera = new BABYLON.ArcRotateCamera('camera', 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+
+        // 通过设置相机位置来覆盖 alpha, beta, radius
+        // camera.setPosition(new BABYLON.Vector3(0, 0, 20));
+
+        // 如果只允许鼠标右键平移相机，可以设置attachControl的第三个参数为false
+        // camera.attachControl(canvas, true, false);
+
+        // 如果想要禁用平移
+        // scene.activeCamera.panningSensibility = 0; // 禁用平移
+
+
+
+        //3.跟随相机 FollowCamera 参数:名称, 位置, 场景
+        let camera = new BABYLON.FollowCamera("camera", new BABYLON.Vector3(0, 10, -10), scene);
+
+        // 全局坐标系下相机距离场景的距离
+        camera.radius = 10
+
+        //在局部坐标下相机的高度高于目标的高度的值
+        camera.heightOffset = 5;
+
+        // 相机在x y平面内围绕目标的局部原点旋转值
+        camera.rotationOffset = 0;
+
+        // 摄像机从当前位置移动到目标位置的加速度
+        camera.cameraAcceleration = 0.005
+
+        // 最大加速值
+        camera.maxCameraSpeed = 10
+
+
+        // 设置相机将事件绑定到画布上
+        camera.attachControl(canvas, true);
+
+        // 创建灯光
+        let light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+        // 创建一个球形
+        let sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 2 }, scene);
+        sphere.position.y = 1;
+
+
+        let ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 6, height: 6 }, scene);
+        return scene;
+
+
+
+        camera.lockedTarget = sphere;
+    };
+    // 渲染场景
+    let scene = createScene();
+    engine.runRenderLoop(function () {
+        scene.render();
+    });
+    // 监听窗口变化，改变渲染尺寸
+    window.addEventListener("resize", function () {
+        engine.resize();
+    });
+</script>
+
+</html>

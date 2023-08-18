@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>07.组合物体</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #box {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="box"></canvas>
+</body>
+<script src="../babylon.js"></script>
+<script>
+    // 获取canvas元素
+    let canvas = document.getElementById("box");
+    // 创建渲染引擎
+    let engine = new BABYLON.Engine(canvas, true);
+    // 创建场景
+    const createScene = function () {
+        let scene = new BABYLON.Scene(engine);
+        let camera = new BABYLON.ArcRotateCamera('camera', 0, 0, 0, BABYLON.Vector3.Zero(), scene);
+        camera.setPosition(new BABYLON.Vector3(0, 0, -10));
+        camera.attachControl(canvas, true);
+        let light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+        let ground = buildGround();
+        let box = buildBox();
+        let roof = buildRoof();
+
+
+        // 将盒子和屋顶合并为一个物体const combined = BABYLON.Mesh.MergeMeshes([物体数组])
+
+        // const combined = BABYLON.Mesh.MergeMeshes([box, roof]); //这会导致屋顶和盒子的纹理被合并
+
+        //使用mergeMeshes方法的第二个参数设置为true，可以保留每个物体的纹理
+        //第二个参数为 true 将处理原始网格，最后一个参数为 true 允许将原始材料单独应用于与原始网格匹配的零件。
+        const combined = BABYLON.Mesh.MergeMeshes([box, roof], true, false, null, false, true);
+
+        // 克隆物体 const 克隆名 = 原始物体.clone('克隆名')
+        const clone = combined.clone('clone');
+        clone.position.x = 2;
+
+        return scene;
+    };
+
+    // 创建地面函数
+    const buildGround = function () {
+        // 为地面添加纹理
+        const groundMat = new BABYLON.StandardMaterial('groundMat');
+        groundMat.diffuseColor = new BABYLON.Color3.Green();
+
+        // 创建地面
+        let ground = BABYLON.MeshBuilder.CreateGround("ground", {
+            width: 5,
+            height: 5
+        });
+        // 将纹理赋值给地面
+        ground.material = groundMat;
+
+        return ground;
+    }
+
+
+    // 创建屋顶函数
+    const buildRoof = function () {
+        // 设置屋顶纹理
+        const roofMat = new BABYLON.StandardMaterial('roofMat');
+        roofMat.diffuseTexture = new BABYLON.Texture('https://assets.babylonjs.com/environments/roof.jpg');
+
+        //添加一个棱形让物体更像房子，使用CreateCylinder创建一个棱形
+        let roof = BABYLON.MeshBuilder.CreateCylinder('roof', {
+            diameter: 1.3, //宽度
+            height: 1.2, //长度
+            tessellation: 3 //面数
+        });
+        roof.position.y = 1.22;
+        roof.scaling.x = 0.75;
+        roof.rotation.z = Math.PI / 2;
+
+        roof.material = roofMat;
+
+        return roof;
+    }
+
+    // 创建Box
+    const buildBox = function () {
+        // 设置盒子纹理
+        const boxMat = new BABYLON.StandardMaterial('boxMat');
+        boxMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/cubehouse.png");
+
+        // 面材质
+        const faceUV = [];
+        //背部
+        faceUV[0] = new BABYLON.Vector4(0.5, 0.0, 0.75, 1.0);
+        //前面
+        faceUV[1] = new BABYLON.Vector4(0.0, 0.0, 0.25, 1.0);
+        //右面
+        faceUV[2] = new BABYLON.Vector4(0.25, 0.0, 0.5, 1.0);
+        //左面
+        faceUV[3] = new BABYLON.Vector4(0.75, 0.0, 1.0, 1.0);
+
+        let box = BABYLON.MeshBuilder.CreateBox("box", { faceUV: faceUV, wrap: true });
+        box.position = new BABYLON.Vector3(0, 0.5, 0);
+
+        // 将纹理赋值给屋顶和盒子
+        box.material = boxMat;
+
+        return box;
+    }
+
+
+
+    // 渲染场景
+    let scene = createScene();
+    engine.runRenderLoop(function () {
+        scene.render();
+    });
+    // 监听窗口变化，改变渲染尺寸
+    window.addEventListener("resize", function () {
+        engine.resize();
+    });
+</script>
+
+</html>
